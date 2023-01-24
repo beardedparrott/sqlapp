@@ -3,22 +3,20 @@ using System.Data.SqlClient;
 
 namespace sqlapp.Services
 {
-    public class ProductService
+    public class ProductService : IProductService
     {
 
-        private static string db_source = "dbserverjustinp.database.windows.net";
-        private static string db_user = "sqladmin";
-        private static string db_password = "Azure@123";
-        private static string db_database = "appdb";
+        private readonly IConfiguration _configuration;
+
+        public ProductService(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
 
         private SqlConnection GetConnection()
         {
-            var _builder = new SqlConnectionStringBuilder();
-            _builder.DataSource = db_source;
-            _builder.UserID = db_user;
-            _builder.Password = db_password;
-            _builder.InitialCatalog = db_database;
-            return new SqlConnection(_builder.ConnectionString);
+
+            return new SqlConnection(_configuration.GetConnectionString("SQLConnection"));
         }
 
         public List<Product> GetProducts()
@@ -31,7 +29,7 @@ namespace sqlapp.Services
             SqlCommand cmd = new SqlCommand(statement, conn);
             using (SqlDataReader reader = cmd.ExecuteReader())
             {
-                while(reader.Read())
+                while (reader.Read())
                 {
                     Product product = new Product()
                     {
